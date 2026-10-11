@@ -6,6 +6,8 @@ interface Props {
   children: number;
   onChange: (adults: number, children: number) => void;
   error?: string;
+  /** Renders without an outer border (used inside grouped panels). */
+  bare?: boolean;
 }
 
 function Stepper({
@@ -56,7 +58,7 @@ function Stepper({
   );
 }
 
-export function PassengerSelector({ adults, children, onChange, error }: Props) {
+export function PassengerSelector({ adults, children, onChange, error, bare }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -89,9 +91,9 @@ export function PassengerSelector({ adults, children, onChange, error }: Props) 
         aria-expanded={open}
         aria-labelledby="pax-label"
         onClick={() => setOpen((v) => !v)}
-        className={`mt-1.5 flex w-full items-center gap-2.5 rounded-lg border bg-white px-3.5 py-3 text-left transition-colors hover:border-brand-500 ${
-          error ? "border-danger" : "border-line"
-        }`}
+        className={`mt-1.5 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left transition-colors hover:bg-white ${
+          bare ? "border border-transparent bg-canvas" : "border border-line bg-white"
+        } ${error ? "!border-danger" : ""}`}
       >
         <Users className="h-[18px] w-[18px] shrink-0 text-muted" aria-hidden="true" />
         <span className="min-w-0 flex-1">

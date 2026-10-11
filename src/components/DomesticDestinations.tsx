@@ -12,28 +12,28 @@ const CARDS = [
     city: "Abuja",
     code: "ABV",
     tagline: "Capital run",
-    description: "The federal capital — government, business, and the fastest hop out of Lagos.",
+    description: "Government, business, and the fastest hop out of Lagos.",
     image: "images/dest-abuja.jpg",
   },
   {
     city: "Kano",
     code: "KAN",
     tagline: "Up north",
-    description: "Commercial heart of the north — markets, history, and warm hospitality.",
+    description: "The commercial heart of the north — markets and history.",
     image: "images/dest-kano.jpg",
   },
   {
     city: "Port Harcourt",
     code: "PHC",
     tagline: "Garden city",
-    description: "Oil city energy with riverside calm — the South-South's busiest gateway.",
+    description: "Oil-city energy with riverside calm in the South-South.",
     image: "images/dest-phc.jpg",
   },
   {
     city: "Enugu",
     code: "ENU",
     tagline: "Coal & hills",
-    description: "Green hills, quiet charm, and the easiest way into the South East.",
+    description: "Green hills and the easiest way into the South East.",
     image: "images/dest-enugu.jpg",
   },
 ];
@@ -61,24 +61,17 @@ export function DomesticDestinations({ onSearchRoute }: Props) {
   };
 
   return (
-    <section id="destinations" className="scroll-mt-20 py-16 sm:py-20">
+    <section id="destinations" className="section-pad scroll-mt-[88px]">
       <div className="shell">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">
-              Domestic destinations
-            </p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              Trending from Lagos
-            </h2>
-            <p className="mt-3 text-base leading-relaxed text-muted">
-              Sample routes for the demonstration — a feel for how quickly travellers can jump to
-              Nigeria's key cities. Tap any card to prefill the search.
-            </p>
-          </div>
+        <div className="max-w-xl">
+          <p className="section-kicker">Domestic destinations</p>
+          <h2 className="section-title">Trending from Lagos</h2>
+          <p className="mt-2.5 text-[15px] leading-relaxed text-muted">
+            Sample routes for the demonstration. Tap any card to prefill the search instantly.
+          </p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {CARDS.map((c) => (
             <DestinationCard
               key={c.code}
@@ -93,9 +86,9 @@ export function DomesticDestinations({ onSearchRoute }: Props) {
           ))}
         </div>
 
-        <div className="mt-8">
+        <div className="mt-6">
           <p className="text-sm font-semibold text-ink">More sample routes</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-2.5 flex flex-wrap gap-2">
             {MORE_ROUTES.map(([from, to]) => (
               <button
                 key={`${from}-${to}`}

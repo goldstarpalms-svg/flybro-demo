@@ -10,9 +10,11 @@ interface Props {
   onChange: (code: string) => void;
   error?: string;
   placeholder: string;
+  /** Renders without an outer border (used inside grouped panels). */
+  bare?: boolean;
 }
 
-export function LocationSelector({ id, label, icon, value, onChange, error, placeholder }: Props) {
+export function LocationSelector({ id, label, icon, value, onChange, error, placeholder, bare }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -69,11 +71,11 @@ export function LocationSelector({ id, label, icon, value, onChange, error, plac
           selected ? `${label}: ${selected.city}, ${selected.code}` : `${label}: ${placeholder}`
         }
         onClick={() => setOpen((v) => !v)}
-        className={`mt-1.5 flex w-full items-center gap-2.5 rounded-lg border bg-white px-3.5 py-3 text-left transition-colors hover:border-brand-500 ${
-          error ? "border-danger" : "border-line"
-        }`}
+        className={`mt-1.5 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left transition-colors hover:bg-canvas ${
+          bare ? "border border-transparent bg-canvas" : "border border-line bg-white"
+        } ${error ? "!border-danger" : ""}`}
       >
-        <Icon className="h-4.5 w-4.5 shrink-0 text-muted" aria-hidden="true" style={{ height: 18, width: 18 }} />
+        <Icon className="h-[18px] w-[18px] shrink-0 text-muted" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           {selected ? (
             <>
@@ -119,7 +121,7 @@ export function LocationSelector({ id, label, icon, value, onChange, error, plac
               <X className="h-4 w-4" />
             </button>
           </div>
-          <ul id={`${id}-list`} role="listbox" aria-label={label} className="max-h-64 overflow-y-auto py-1">
+          <ul id={`${id}-list`} role="listbox" aria-label={label} className="max-h-56 overflow-y-auto py-1 sm:max-h-64">
             {filtered.length === 0 ? (
               <li className="px-4 py-6 text-center text-sm text-muted">
                 No airports match “{query}”. Try Lagos, Abuja, or a code like LOS.

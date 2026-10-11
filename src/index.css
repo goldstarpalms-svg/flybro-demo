@@ -5,11 +5,14 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Keeps anchored sections clear of the sticky header (FAQ-heading fix). */
+    scroll-padding-top: 88px;
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     @apply bg-canvas text-ink font-sans antialiased;
+    overflow-x: hidden;
   }
 
   ::selection {
@@ -34,11 +37,11 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-card transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-card transition-colors hover:bg-brand-700 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-5 py-2.5 text-sm font-semibold text-ink shadow-card transition-colors hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-5 py-2.5 text-sm font-semibold text-ink shadow-card transition-colors hover:border-brand-500 hover:bg-canvas active:bg-canvas disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-ghost {
@@ -49,8 +52,24 @@
     @apply block text-[11px] font-semibold uppercase tracking-wide text-muted;
   }
 
+  .field-surface {
+    @apply flex w-full items-center gap-2.5 rounded-lg border border-line bg-white px-3.5 py-3 text-left transition-colors hover:border-brand-500 focus-within:border-brand-500;
+  }
+
   .card {
     @apply rounded-xl border border-line bg-white shadow-card;
+  }
+
+  .section-pad {
+    @apply py-12 sm:py-16;
+  }
+
+  .section-kicker {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-brand-600;
+  }
+
+  .section-title {
+    @apply mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl;
   }
 }
 

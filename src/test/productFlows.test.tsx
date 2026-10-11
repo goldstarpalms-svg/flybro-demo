@@ -121,4 +121,58 @@ describe("FlyBro demo — product flows", () => {
 
     vi.useRealTimers();
   });
+
+  it("opens the mobile filter sheet with functional Apply and Reset controls", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: (ms) => vi.advanceTimersByTime(ms) });
+    render(<App />);
+    const form = getSearchForm();
+
+    await user.click(within(form).getByRole("button", { name: /search flights/i }));
+    await waitFor(
+      () => {
+        expect(screen.getByText(/sample result/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
+    // Open the mobile filter sheet.
+    await user.click(screen.getByRole("button", { name: /^filters/i }));
+    const sheet = screen.getByRole("dialog", { name: /flight filters/i });
+
+    // Draft a filter inside the sheet, then Apply.
+    await user.click(within(sheet).getByRole("radio", { name: /nonstop only/i }));
+    await user.click(within(sheet).getByRole("button", { name: /apply/i }));
+    expect(screen.queryByRole("dialog", { name: /flight filters/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /filters \(1\)/i })).toBeInTheDocument();
+
+    // Reopen and Reset the draft back to defaults, then Apply.
+    await user.click(screen.getByRole("button", { name: /filters \(1\)/i }));
+    const sheet2 = screen.getByRole("dialog", { name: /flight filters/i });
+    await user.click(within(sheet2).getByRole("button", { name: /^reset$/i }));
+    await user.click(within(sheet2).getByRole("button", { name: /apply/i }));
+    expect(screen.getByRole("button", { name: /^filters/i })).toBeInTheDocument();
+
+    vi.useRealTimers();
+  });
+
+  it("marks the cheapest flight clearly and keeps sample-data labels", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: (ms) => vi.advanceTimersByTime(ms) });
+    render(<App />);
+    const form = getSearchForm();
+
+    await user.click(within(form).getByRole("button", { name: /search flights/i }));
+    await waitFor(
+      () => {
+        expect(screen.getByText(/sample result/i)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
+    expect(screen.getByText("Cheapest")).toBeInTheDocument();
+    expect(screen.getAllByText(/sample fare per adult/i).length).toBeGreaterThan(0);
+
+    vi.useRealTimers();
+  });
 });

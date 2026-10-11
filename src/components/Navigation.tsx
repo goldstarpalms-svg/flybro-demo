@@ -41,11 +41,11 @@ export function Navigation({ onFindFlights, onHome, isHome }: Props) {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b transition-colors ${
-        scrolled ? "border-line bg-white/95 backdrop-blur" : "border-transparent bg-white"
+      className={`sticky top-0 z-50 border-b border-line bg-white transition-shadow ${
+        scrolled ? "shadow-card" : ""
       }`}
     >
-      <div className="shell flex h-16 items-center justify-between gap-4">
+      <div className="shell flex h-14 items-center justify-between gap-4 sm:h-16">
         <button type="button" onClick={onHome} aria-label="FlyBro home" className="shrink-0">
           <Logo />
         </button>
@@ -73,16 +73,16 @@ export function Navigation({ onFindFlights, onHome, isHome }: Props) {
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-line text-ink lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink lg:hidden"
           >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {menuOpen ? <X className="h-4.5 w-4.5" style={{ height: 18, width: 18 }} /> : <Menu className="h-4.5 w-4.5" style={{ height: 18, width: 18 }} />}
           </button>
         </div>
       </div>
 
       {menuOpen ? (
-        <div className="border-t border-line bg-white lg:hidden">
-          <nav aria-label="Mobile navigation" className="shell flex flex-col gap-1 py-3">
+        <div className="border-t border-line bg-white shadow-panel lg:hidden">
+          <nav aria-label="Mobile navigation" className="shell flex flex-col gap-0.5 py-2">
             {LINKS.map((l) => (
               <button
                 key={l.id}
@@ -99,7 +99,7 @@ export function Navigation({ onFindFlights, onHome, isHome }: Props) {
                 setMenuOpen(false);
                 onFindFlights();
               }}
-              className="btn-primary mt-1"
+              className="btn-primary mt-1.5"
             >
               <Plane className="h-4 w-4" aria-hidden="true" />
               Find flights

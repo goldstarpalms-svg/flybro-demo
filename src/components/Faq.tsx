@@ -32,16 +32,14 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="scroll-mt-20 py-16 sm:py-20">
+    <section id="faq" className="section-pad scroll-mt-[88px]">
       <div className="shell max-w-3xl">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">FAQ</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            Questions, answered honestly
-          </h2>
+          <p className="section-kicker">FAQ</p>
+          <h2 className="section-title">Questions, answered honestly</h2>
         </div>
 
-        <div className="mt-8 divide-y divide-line overflow-hidden rounded-xl border border-line bg-white">
+        <div className="mt-6 divide-y divide-line overflow-hidden rounded-xl border border-line bg-white">
           {ITEMS.map((item, i) => {
             const expanded = open === i;
             return (
@@ -52,19 +50,20 @@ export function Faq() {
                     aria-expanded={expanded}
                     aria-controls={`faq-panel-${i}`}
                     onClick={() => setOpen(expanded ? null : i)}
-                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-canvas"
+                    className="flex w-full items-center justify-between gap-4 px-4 py-3.5 text-left transition-colors hover:bg-canvas sm:px-5"
                   >
                     <span className="text-sm font-semibold text-ink sm:text-base">{item.q}</span>
                     <ChevronDown
-                      className={`h-5 w-5 shrink-0 text-muted transition-transform ${
+                      className={`h-4.5 w-4.5 shrink-0 text-muted transition-transform ${
                         expanded ? "rotate-180" : ""
                       }`}
                       aria-hidden="true"
+                      style={{ height: 18, width: 18 }}
                     />
                   </button>
                 </h3>
                 {expanded ? (
-                  <div id={`faq-panel-${i}`} className="px-5 pb-5 text-sm leading-relaxed text-muted">
+                  <div id={`faq-panel-${i}`} className="px-4 pb-4 text-sm leading-relaxed text-muted sm:px-5">
                     {item.a}
                   </div>
                 ) : null}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   SlidersHorizontal,
@@ -6,6 +6,7 @@ import {
   SearchX,
   Loader2,
   CheckCircle2,
+  X,
 } from "lucide-react";
 import type { Filters, SampleFlight, SearchQuery, SortOption } from "../lib/types";
 import { EMPTY_FILTERS } from "../lib/types";
@@ -38,7 +39,7 @@ function SkeletonCard() {
   return (
     <div className="card animate-pulse p-5">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-lg bg-line" />
+        <div className="h-8 w-8 rounded-md bg-line" />
         <div className="space-y-2">
           <div className="h-3 w-32 rounded bg-line" />
           <div className="h-2.5 w-20 rounded bg-line" />
@@ -70,7 +71,8 @@ export function ResultsView({
   const [selectedOutbound, setSelectedOutbound] = useState<SampleFlight | null>(null);
   const [sort, setSort] = useState<SortOption["id"]>("price");
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [draft, setDraft] = useState<Filters>(EMPTY_FILTERS);
   const [detailsFlight, setDetailsFlight] = useState<SampleFlight | null>(null);
   const [booking, setBooking] = useState<{ outbound: SampleFlight; returnFlight?: SampleFlight } | null>(
     null,
@@ -89,6 +91,7 @@ export function ResultsView({
   const bounds = priceBounds(currentLegFlights);
   const lowest = sorted.length > 0 ? Math.min(...sorted.map((f) => f.priceNGN)) : null;
 
+  // Badge identities — cheapest always gets the "Cheapest" badge (easy to identify).
   const cheapest = sorted.length ? sorted.reduce((a, b) => (a.priceNGN <= b.priceNGN ? a : b)) : null;
   const earliest = sorted.length
     ? sorted.reduce((a, b) => (a.departISO <= b.departISO ? a : b))
@@ -99,9 +102,41 @@ export function ResultsView({
       )
     : null;
 
+  const badgeFor = (f: SampleFlight) => {
+    if (cheapest && f.id === cheapest.id) return "Cheapest" as const;
+    if (bestValue && f.id === bestValue.id) return "Best value" as const;
+    if (earliest && f.id === earliest.id) return "Earliest" as const;
+    return undefined;
+  };
+
   const nActive = activeFilterCount(filters);
+  const nDraft = activeFilterCount(draft);
 
   const resetFilters = () => setFilters(EMPTY_FILTERS);
+
+  // Mobile sheet: draft state with explicit Apply / Reset.
+  const openSheet = () => {
+    setDraft(filters);
+    setSheetOpen(true);
+  };
+  const applySheet = () => {
+    setFilters(draft);
+    setSheetOpen(false);
+  };
+  const resetSheet = () => setDraft(EMPTY_FILTERS);
+
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSheetOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [sheetOpen]);
 
   const selectOutbound = (f: SampleFlight) => {
     setSelectedOutbound(f);
@@ -151,22 +186,22 @@ export function ResultsView({
         : "Step 2 of 2 · Return flight";
 
   return (
-    <main className="shell py-8 sm:py-10">
+    <main className="shell py-6 sm:py-8">
       {/* Search summary */}
-      <div className="card p-4 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
+      <div className="card p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
               {legLabel}
             </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+            <h1 className="mt-1 break-words text-xl font-bold tracking-tight text-ink sm:text-2xl">
               {airportLabel(query.origin)}{" "}
               <span className="text-muted" aria-hidden="true">
                 →
               </span>{" "}
               {airportLabel(query.destination)}
             </h1>
-            <p className="mt-1.5 text-sm text-muted">
+            <p className="mt-1 text-sm text-muted">
               {formatDateShort(query.departDate)}
               {query.returnDate ? ` – ${formatDateShort(query.returnDate)}` : ""} ·{" "}
               {query.tripType === "round-trip" ? "Round-trip" : "One-way"} ·{" "}
@@ -182,7 +217,7 @@ export function ResultsView({
         </div>
 
         {isRoundTrip && selectedOutbound ? (
-          <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-success/25 bg-success/5 p-3">
+          <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-success/25 bg-success/5 p-3">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
             <p className="text-xs leading-relaxed text-ink">
               <strong>Outbound selected:</strong> {selectedOutbound.origin} →{" "}
@@ -196,8 +231,8 @@ export function ResultsView({
       </div>
 
       {/* Results summary */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm text-ink">
             {loading ? (
               <span className="inline-flex items-center gap-2 text-muted">
@@ -216,7 +251,7 @@ export function ResultsView({
               Lowest sample fare {formatNaira(lowest)}
             </span>
           ) : null}
-          <span className="rounded-full bg-canvas px-3 py-1 text-xs font-medium text-muted">
+          <span className="hidden rounded-full bg-canvas px-3 py-1 text-xs font-medium text-muted sm:inline">
             {flightProvider.label}
           </span>
         </div>
@@ -224,9 +259,9 @@ export function ResultsView({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setShowMobileFilters((v) => !v)}
+            onClick={openSheet}
             className="btn-secondary lg:hidden"
-            aria-expanded={showMobileFilters}
+            aria-expanded={sheetOpen}
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             Filters{nActive > 0 ? ` (${nActive})` : ""}
@@ -249,24 +284,26 @@ export function ResultsView({
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
-        {/* Filters */}
+      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[252px_1fr]">
+        {/* Filters — desktop sidebar (immediate apply) */}
         <aside
-          className={`${showMobileFilters ? "block" : "hidden"} rounded-xl border border-line bg-white p-5 lg:block`}
+          className="hidden lg:block"
           aria-label="Flight filters"
         >
-          <FlightFilters
-            flights={currentLegFlights}
-            filters={filters}
-            onChange={setFilters}
-            onReset={resetFilters}
-          />
-          {bounds.max > 0 ? (
-            <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-muted">
-              Sample fares in this result set range from {formatNaira(bounds.min)} to{" "}
-              {formatNaira(bounds.max)}.
-            </p>
-          ) : null}
+          <div className="sticky top-24 rounded-xl border border-line bg-white p-5">
+            <FlightFilters
+              flights={currentLegFlights}
+              filters={filters}
+              onChange={setFilters}
+              onReset={resetFilters}
+            />
+            {bounds.max > 0 ? (
+              <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-muted">
+                Sample fares in this result set range from {formatNaira(bounds.min)} to{" "}
+                {formatNaira(bounds.max)}.
+              </p>
+            ) : null}
+          </div>
         </aside>
 
         {/* Results */}
@@ -311,7 +348,7 @@ export function ResultsView({
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {sorted.map((f) => (
                 <FlightCard
                   key={f.id}
@@ -319,18 +356,10 @@ export function ResultsView({
                   primaryLabel={primaryLabel}
                   onPrimary={() => onPrimary(f)}
                   onDetails={() => setDetailsFlight(f)}
-                  badge={
-                    bestValue && f.id === bestValue.id
-                      ? "Best value"
-                      : cheapest && f.id === cheapest.id
-                        ? "Cheapest"
-                        : earliest && f.id === earliest.id
-                          ? "Earliest"
-                          : undefined
-                  }
+                  badge={badgeFor(f)}
                 />
               ))}
-              <p className="px-1 pt-2 text-xs leading-relaxed text-muted">
+              <p className="px-1 pt-1 text-xs leading-relaxed text-muted">
                 All fares, times, and flight numbers above are sample data for this demonstration —
                 never live prices. In the real FlyBro, you'd continue to the airline's site to see
                 the live fare and book.
@@ -339,6 +368,46 @@ export function ResultsView({
           )}
         </section>
       </div>
+
+      {/* Mobile filter bottom sheet — draft state with Apply / Reset */}
+      {sheetOpen ? (
+        <div className="fixed inset-0 z-[65] lg:hidden" role="dialog" aria-modal="true" aria-label="Flight filters">
+          <div
+            className="absolute inset-0 bg-navy/50"
+            onClick={() => setSheetOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl bg-white shadow-pop">
+            <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+              <h2 className="text-base font-bold text-ink">Filters &amp; sorting</h2>
+              <button
+                type="button"
+                aria-label="Close filters"
+                onClick={() => setSheetOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-muted hover:bg-canvas hover:text-ink"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <FlightFilters
+                flights={currentLegFlights}
+                filters={draft}
+                onChange={setDraft}
+                onReset={resetSheet}
+              />
+            </div>
+            <div className="flex items-center gap-2.5 border-t border-line px-5 py-4">
+              <button type="button" onClick={resetSheet} className="btn-secondary flex-1">
+                Reset
+              </button>
+              <button type="button" onClick={applySheet} className="btn-primary flex-[2]">
+                Apply{nDraft > 0 ? ` (${nDraft})` : ""} filters
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {detailsFlight ? (
         <FlightDetails
@@ -362,17 +431,6 @@ export function ResultsView({
           }}
         />
       ) : null}
-
-      {nActive > 0 && !loading && sorted.length > 0 ? (
-        <button
-          type="button"
-          onClick={resetFilters}
-          className="fixed bottom-5 left-1/2 z-30 -translate-x-1/2 rounded-full border border-line bg-white px-5 py-2.5 text-sm font-semibold text-ink shadow-pop lg:hidden"
-        >
-          Clear {nActive} filter{nActive === 1 ? "" : "s"}
-        </button>
-      ) : null}
-
     </main>
   );
 }
